@@ -1,0 +1,40 @@
+# pseudo-replication 문제
+
+4개의 블록이 반복되었고, 각 블록은 다시 2 개로 분할되어 control과 irrigated로 배치되었다.
+그리고 control과 irrigated 구역은 다시 3개의 density 그룹으로 분할됨
+그리고 각 그룹에서 fertilizer 처리가 이루어 짐
+
+본 연구의 목적은 fertilizer 종류가 작물의 수확량에 미치는 영향을 알아본 것인데,
+이러한 효과가 density와 irrigation에 대한 효과에 따라 어떻게 변하는지를 알아봄
+따라서 density와 irrigation의 효과는 중요하지 않다.
+
+따라서 block과 irrigation 까지를 실험개수(experiment unit)로 보는 것이 맞다.
+
+만약 이러한 조건을 무시하고 그냥 anova를 진행하면 
+
+                              Df Sum Sq Mean Sq F value   Pr(>F)    fertilizer                     2   1977     989   7.116  0.00181 ** density                        2   1758     879   6.328  0.00340 ** irrigation                     1   8278    8278  59.575 2.81e-10 ***fertilizer:density             4    305      76   0.549  0.70082    fertilizer:irrigation          2    953     477   3.431  0.03956 *  density:irrigation             2   2747    1374   9.885  0.00022 ***fertilizer:density:irrigation  4    235      59   0.422  0.79183    Residuals                     54   7503     139                     ---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+과 같은 결과가 나온다. 
+
+total의 자유도를 보면 2 + 2 + 1 + 4 + 2 + 2+ 4 + 54 = 71 이 나온다. 즉 모든 관측치의 개수를 전부 고려한 경우가 된다. 
+따라서 잔차의 자유도가 54가 된다.
+
+이제 block, irrigation, 그리고 density를 분할하면서 발생할 수 있는 오류를 조정하자. 그 결과는 
+
+Error: block          Df Sum Sq Mean Sq F value Pr(>F)Residuals  3  194.4   64.81               Error: block:irrigation           Df Sum Sq Mean Sq F value Pr(>F)  irrigation  1   8278    8278   17.59 0.0247 *Residuals   3   1412     471                 ---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1Error: block:irrigation:density                   Df Sum Sq Mean Sq F value Pr(>F)  density             2   1758   879.2   3.784 0.0532 .density:irrigation  2   2747  1373.5   5.912 0.0163 *Residuals          12   2788   232.3                 ---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1Error: Within                              Df Sum Sq Mean Sq F value   Pr(>F)    fertilizer                     2 1977.4   988.7  11.449 0.000142 ***fertilizer:density             4  304.9    76.2   0.883 0.484053    fertilizer:irrigation          2  953.4   476.7   5.520 0.008108 ** fertilizer:density:irrigation  4  234.7    58.7   0.680 0.610667    Residuals                     36 3108.8    86.4                     ---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+(3 + 1 + 3 + 2 + 2 + 12) + 2 + 4 + 2 + 4 + 36 = 71
+
+위 자유도 합 계산에서 괄호 안의 숫자들은 Error 계산에서 온 것이다. 
+(3 + 1 + 3 + 2 + 2 + 12) = 23
+
+즉 pseudo-replication이 총 (23 + 1)개가 숨어있었던 것이다.
+4 (block) * 2 (irrigation) * 3 (density)가 중복으로 측정된 반복수가 된다.
+
+
+
+
+
+
+
