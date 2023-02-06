@@ -3,7 +3,7 @@ getwd()
 setwd("./Documents/RUMINO2023/theRbook3e")
 dataPath = "./dataSet/"
 
-# factorial design analysis 
+# 1. factorial design analysis ----
 dat = read.table(paste0(dataPath, "growth.txt"), header = T, 
                  colClasses = list(diet = "factor", supplement = "factor"))
 head(dat)
@@ -38,40 +38,57 @@ supplementcontrolValue
 supplementcontrolValue - interceptValue
 
 
-# Pseudo-replication
-dat <- read.table(paste0(dataPath, "splityield.txt"), header = T)
+# 2. Pseudo-replication ----
+dat <- read.table("./dataSet/splityield.txt", header = T)
 head(dat)
-
-dat %>%
-  group_by(block, irrigation, density) %>%
-  summarise(n = n())
-
 # DOE structure
-4 * 2 * 3 * 3 #block (4) * irrigation (2) * density(3) * fertilizer (3)
 dim(dat)
+#block (4) * irrigation (2) * density(3) * fertilizer (3)
+# 각 fertilizer에 대한 반복이 없고, block으로 반복이 이루어진 상태
+4 * 2 * 3 * 3 
+
 
 # target factor는 irrigation, density, fertilizer 이고 replication은 block인 상태
-
+# 일반 ANOVA
 mod <- aov(yield ~ fertilizer * density * irrigation, data = dat)
 summary(mod)
-# degree of freedom for residuals
+# 자유도 계산
+2 + 2 + 1 + 4 + 2 + 2+ 4 + 54
+# pseudo-replication 적용
+mod1 <- aov(yield ~ fertilizer * density * irrigation +
+              Error(block/irrigation/density), data = dat)
 
-# replication: 4
-# formula for residual df: N - k
-72 - (2*3*3)
+summary(mod1)
 
-dim(mtcars)
+# 자유도 계산에 관한 내용은 ch16.txt 파일 참조
 
-summary(aov(mpg ~ as.factor(cyl)*as.factor(am), data = mtcars))
-31 - 26
+# pseudo-replication의 두 번째 예제
 
-(2 + 2 + 1 + 4 + 2 + 2 + 4) + 54 
 
-(2 + 2 + 4 + 4) + 36
+dat2 <- data.frame(block = rep(c("b1", "b2"), each = 18),
+                   group1 = rep(c("A", "B"), each = 9, times = 2),
+                   group2 = rep(c("a", "b", "c"), each = 3, times = 4),
+                   value = rnorm(36, 100, 10))
+head(dat2)
 
-72 - 24
+# group2가 value에 미치는 효과와 group2의 효과가 group1에 조건에 따라서 다르게 나타나는지를 알아봄
+# pseudo-replication 요소는 block, group1이 된다.
 
-72 - (4 + 5 + 15)
+# 우선 그냥 anova
+mod2 <- aov(value ~ group2*group1, data = dat2)
+summary(mod2)
+# residual의 자유도가 30이고 total의 자유도가 35가 된다
 
-EUCAL
+# pseudo-replication 적용
+mod3 <- aov(value ~ group2*group1+Error(block/group1), data = dat2)
+summary(mod3)
+
+# 자유도 확인 
+(1 + 1 + 1) + 2 + 2 + 28
+# 제거된 pseudo-replication 자유도
+1 + 1 + 1
+# block (2) * group1 (2) = 4
+
+
+
 
